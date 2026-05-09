@@ -7,6 +7,11 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * Public-facing DTO for a file record.
+ * Does NOT expose: internal id, storagePath, storedName, checksumSha256, scanResult.
+ * Those fields are internal to the server and must never reach the client.
+ */
 @Getter
 @Setter
 @Builder
@@ -14,11 +19,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class FileMetadataResponse {
 
-    /**
-     * Public-facing DTO for a file record.
-     * Does NOT expose: internal id, storagePath, storedName, checksumSha256, scanResult.
-     * Those fields are internal to the server and must never reach the client.
-     */
     private String uuid;
     private FileType fileType;
     private FileStatus status;

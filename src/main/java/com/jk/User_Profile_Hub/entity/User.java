@@ -41,7 +41,7 @@ public class User implements Serializable {
     /**
      * Public-facing identifier (UUID v4).
      * Exposed in all API responses and used in URL paths.
-     * Example: "550e8400-e29b-41d4-a716-446655440000"
+     * Example: "/550e8400-e29b-41d4-a716-446655440000"
      */
     @Column(name = "uuid", nullable = false, updatable = false, length = 36)
     private String uuid;
@@ -149,7 +149,7 @@ public class User implements Serializable {
                 .lastName(lastName)
                 .email(email)
                 .passwordHash(passwordHash)
-                .role(Role.USER)
+                .role(Role.ROLE_USER)
                 .active(true)
                 .build();
     }
@@ -159,7 +159,7 @@ public class User implements Serializable {
     // ============================================
 
     public boolean isAdmin() {
-        return this.role == Role.ADMIN;
+        return this.role == Role.ROLE_ADMIN;
     }
 
     /**

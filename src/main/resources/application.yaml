@@ -1,3 +1,7 @@
 spring:
   application:
     name: User-Profile-Hub
+
+
+jwt:
+  secret: ${JWT_SECRET}

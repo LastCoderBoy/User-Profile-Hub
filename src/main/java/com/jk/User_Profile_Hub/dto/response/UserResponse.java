@@ -6,18 +6,17 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * Public-facing DTO. Never includes passwordHash, internal id, or deletedAt.
+ * Constructed exclusively via the static factory {@link #from(User)} to
+ * guarantee no accidental field leakage.
+ */
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponse {
-
-    /**
-     * Public-facing DTO. Never includes passwordHash, internal id, or deletedAt.
-     * Constructed exclusively via the static factory {@link #from(User)} to
-     * guarantee no accidental field leakage.
-     */
     private String uuid;
     private String fullName;
     private String email;
