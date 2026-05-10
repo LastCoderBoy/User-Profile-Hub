@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
         indexes = {
                 @Index(name = "idx_token", columnList = "token"),
                 @Index(name = "idx_user_id", columnList = "user_id"),
-                @Index(name = "idx_expires_at", columnList = "expiresAt")
+                @Index(name = "idx_expires_at", columnList = "expires_at")
         },
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_token", columnNames = "token")
@@ -34,23 +34,23 @@ public class RefreshToken {
     @Column(nullable = false, unique = true, length = 500)
     private String token;
 
-    @Column(nullable = false)
+    @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
     @Column(nullable = false)
     private Boolean revoked = false;
 
-    @Column
+    @Column(name = "revoked_at")
     private LocalDateTime revokedAt;
 
-    @Column(length = 45)
+    @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
-    @Column(length = 255)
+    @Column(name = "user_agent", length = 255)
     private String userAgent;
 
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     // ============= RELATIONSHIPS =============

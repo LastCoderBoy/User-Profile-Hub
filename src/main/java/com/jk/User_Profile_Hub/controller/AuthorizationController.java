@@ -4,7 +4,7 @@ import com.jk.User_Profile_Hub.dto.ApiResponse;
 import com.jk.User_Profile_Hub.dto.request.LoginRequest;
 import com.jk.User_Profile_Hub.dto.request.RegisterRequest;
 import com.jk.User_Profile_Hub.dto.response.AuthResponse;
-import com.jk.User_Profile_Hub.entity.UserPrincipal;
+import com.jk.User_Profile_Hub.security.UserPrincipal;
 import com.jk.User_Profile_Hub.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,7 +1,6 @@
 package com.jk.User_Profile_Hub.security;
 
 import com.jk.User_Profile_Hub.entity.User;
-import com.jk.User_Profile_Hub.entity.UserPrincipal;
 import com.jk.User_Profile_Hub.redis.RedisService;
 import com.jk.User_Profile_Hub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,7 @@
-package com.jk.User_Profile_Hub.entity;
+package com.jk.User_Profile_Hub.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jk.User_Profile_Hub.entity.User;
 import com.jk.User_Profile_Hub.enums.Role;
 import lombok.Builder;
 import lombok.Getter;

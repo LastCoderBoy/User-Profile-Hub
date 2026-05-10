@@ -26,9 +26,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AuditLog {
 
-    /**
-     * Audit logs are append-only. No updates, no soft-delete.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -81,10 +78,6 @@ public class AuditLog {
 
     // ============ Request Context ============
 
-    /**
-     * Client IP address at the time of the action.
-     * Supports IPv4 and IPv6 (max 45 chars for IPv6 with zone ID).
-     */
     @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
@@ -101,9 +94,6 @@ public class AuditLog {
     // Factory Methods
     // ============================================
 
-    /**
-     * Logs a file-level action (upload, download, delete, replace, etc.)
-     */
     public static AuditLog forFile(Long userId, Long actorId, String actorRole, AuditAction action,
                                    FileMetadata file, String ipAddress, String userAgent) {
         return AuditLog.builder()
@@ -118,10 +108,6 @@ public class AuditLog {
                 .build();
     }
 
-    /**
-     * Logs a profile-level action (summary update, account created, etc.)
-     * No file is involved.
-     */
     public static AuditLog forProfile(Long userId, Long actorId, String actorRole, AuditAction action,
                                       String detail, String ipAddress, String userAgent) {
         return AuditLog.builder()

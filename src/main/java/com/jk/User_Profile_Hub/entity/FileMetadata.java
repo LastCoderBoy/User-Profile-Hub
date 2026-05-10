@@ -38,10 +38,6 @@ public class FileMetadata {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Public-facing file identifier (UUID v4).
-     * Used in download/preview URLs: GET /files/{uuid}
-     */
     @Column(name = "uuid", nullable = false, updatable = false, length = 36)
     private String uuid;
 
@@ -67,11 +63,7 @@ public class FileMetadata {
 
     // ============ File Identity ============
 
-    /**
-     * The original filename as provided by the user at upload time.
-     * Stored for display/download purposes only — never used for I/O.
-     * Example: "John_Doe_CV_2025.pdf"
-     */
+    // The original filename as provided by the user at upload time.
     @Column(name = "original_name", nullable = false, length = 255)
     private String originalName;
 
@@ -88,7 +80,6 @@ public class FileMetadata {
      * Full relative path within the storage root.
      * Format: {userId}/{fileType}/original/{storedName}
      * Example: "42/cv/original/a3f8c2e1-d4b7.pdf"
-     * Relative — the storage root prefix is resolved at runtime via StorageProvider.
      */
     @Column(name = "storage_path", nullable = false, updatable = false, length = 500)
     private String storagePath;
@@ -135,7 +126,7 @@ public class FileMetadata {
     // ============ Scan Result ============
 
     /**
-     * Result from the antivirus scan (e.g. ClamAV).
+     * Result from the antivirus scan.
      * Null until the async scan job completes.
      * Example: "OK", "Eicar-Test-Signature FOUND"
      */

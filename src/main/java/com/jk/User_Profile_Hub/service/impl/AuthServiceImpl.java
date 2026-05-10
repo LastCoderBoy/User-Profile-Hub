@@ -7,7 +7,7 @@ import com.jk.User_Profile_Hub.dto.response.AuthResponse;
 import com.jk.User_Profile_Hub.dto.response.UserResponse;
 import com.jk.User_Profile_Hub.entity.RefreshToken;
 import com.jk.User_Profile_Hub.entity.User;
-import com.jk.User_Profile_Hub.entity.UserPrincipal;
+import com.jk.User_Profile_Hub.security.UserPrincipal;
 import com.jk.User_Profile_Hub.exception.DuplicateResourceFoundException;
 import com.jk.User_Profile_Hub.exception.InvalidTokenException;
 import com.jk.User_Profile_Hub.exception.ResourceNotFoundException;
@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional(rollbackFor = Exception.class)  // Rollback on ANY exception
     @Override
-    public AuthResponse register(RegisterRequest registerRequest, HttpServletResponse response, HttpServletRequest request) {
+    public AuthResponse register(RegisterRequest registerRequest, HttpServletResponse httpResponse, HttpServletRequest httpRequest) {
         log.info("[AUTH-SERVICE] Starting registration for user: {}", registerRequest.getEmail());
 
         // Check email exist in our database or not
@@ -62,49 +62,26 @@ public class AuthServiceImpl implements AuthService {
             throw new DuplicateResourceFoundException("User with email " + registerRequest.getEmail() + " already exists");
         }
 
-        // Extract Headers
-        String clientIP = HeaderExtractor.extractClientIp(request);
-        String userAgent = HeaderExtractor.extractUserAgent(request);
-
         // Create and Save User
-        String bcryptPassword = passwordEncoder.encode(registerRequest.getPassword());
         User newUser = User.createNew(
                 registerRequest.getFirstName(),
                 registerRequest.getLastName(),
                 registerRequest.getEmail(),
-                bcryptPassword,
+                passwordEncoder.encode(registerRequest.getPassword()),
                 registerRequest.getPhoneNumber()
         );
         newUser = userRepository.save(newUser);
         log.info("[AUTH-SERVICE] User saved with ID: {}", newUser.getId());
 
-        // Generate Access Token
-        String accessToken = jwtTokenProcessor.generateAccessToken(
-                newUser.getEmail(),
-                newUser.getRole().name()
-        );
-
-        // Create and Save Refresh Token
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(
-                newUser,
-                clientIP,
-                userAgent
-        );
-
-        // Set the Refresh token cookie
-        cookiesManager.setRefreshTokenCookie(response, refreshToken.getToken());
-
-        UserResponse userResponse = UserResponse.from(newUser);
-
-        return AuthResponse.of(
-                accessToken,
-                ACCESS_TOKEN_DURATION_MS / 1000,
-                userResponse);
+        return issueAuthResponse(newUser,
+                HeaderExtractor.extractClientIp(httpRequest),
+                HeaderExtractor.extractUserAgent(httpRequest),
+                httpResponse);
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public AuthResponse login(LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
+    public AuthResponse login(LoginRequest loginRequest, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
@@ -114,31 +91,14 @@ public class AuthServiceImpl implements AuthService {
         log.info("[AUTH-SERVICE] Authentication successful for user: {} (ID: {})",
                 principal.getUsername(), principal.getId()); // username is email in our case
 
-        String clientIp = HeaderExtractor.extractClientIp(request);
-        String userAgent = HeaderExtractor.extractUserAgent(request);
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Generate Access Token
-        String accessToken = jwtTokenProcessor.generateAccessToken(
-                principal.getEmail(),
-                principal.getUserRoleString()
-        );
 
-        // Generate Refresh Token
-        User user = findUserById(principal.getId());
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(
-                user, clientIp, userAgent
-        );
-
-        cookiesManager.setRefreshTokenCookie(response, refreshToken.getToken());
-
-        // Cache user profile after successful login
-        UserResponse userDto = UserResponse.from(user);
-        redisService.cacheUserProfile(user.getId(), userDto);
-
-        return AuthResponse.of(
-                accessToken,
-                ACCESS_TOKEN_DURATION_MS / 1000,
-                userDto);
+        return issueAuthResponse(user,
+                HeaderExtractor.extractClientIp(httpRequest),
+                HeaderExtractor.extractUserAgent(httpRequest),
+                httpResponse);
     }
 
     @Transactional
@@ -188,7 +148,7 @@ public class AuthServiceImpl implements AuthService {
             throw new DisabledException("Your account is not active. Please contact support for assistance.");
         }
 
-        // Generate new Refresh Token
+        // Rotate the Refresh Token
         RefreshToken newRefreshToken = refreshTokenService.rotateRefreshToken(
                 oldRefreshToken,
                 clientIp,
@@ -216,6 +176,37 @@ public class AuthServiceImpl implements AuthService {
     //                    HELPER METHODS
     // ====================================================
 
+    /**
+     * Finalizes authentication for both register and login flows.
+     * Generates access token, creates refresh token, sets cookie,
+     * caches the user profile, and returns the auth response.
+     */
+    private AuthResponse issueAuthResponse(User user,
+                                           String clientIp,
+                                           String userAgent,
+                                           HttpServletResponse response) {
+
+        String accessToken = jwtTokenProcessor.generateAccessToken(
+                user.getEmail(),
+                user.getRole().name()
+        );
+
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(
+                user, clientIp, userAgent
+        );
+
+        cookiesManager.setRefreshTokenCookie(response, refreshToken.getToken());
+
+        UserResponse userResponse = UserResponse.from(user);
+        redisService.cacheUserProfile(user.getId(), userResponse);
+
+        return AuthResponse.of(
+                accessToken,
+                ACCESS_TOKEN_DURATION_MS / 1000,
+                userResponse
+        );
+    }
+
     private void blacklistAccessToken(String authHeader){
         if(authHeader != null){
             try {
@@ -234,13 +225,5 @@ public class AuthServiceImpl implements AuthService {
                 log.debug("[AUTH-SERVICE] Skipping access token blacklist during logout: {}", e.getMessage());
             }
         }
-    }
-
-    private User findUserById(Long userId){
-        return userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    log.warn("[AUTH-SERVICE] User not found with ID: {}", userId);
-                    return new ResourceNotFoundException("User not found");
-                });
     }
 }

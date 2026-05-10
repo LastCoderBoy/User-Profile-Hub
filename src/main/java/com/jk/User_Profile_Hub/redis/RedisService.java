@@ -1,7 +1,7 @@
 package com.jk.User_Profile_Hub.redis;
 
 import com.jk.User_Profile_Hub.dto.response.UserResponse;
-import com.jk.User_Profile_Hub.entity.UserPrincipal;
+import com.jk.User_Profile_Hub.security.UserPrincipal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -140,6 +140,16 @@ public class RedisService {
         } catch (Exception e) {
             log.error("[REDIS-SERVICE] Failed to get cached user profile: {}", e.getMessage(), e);
             return null; // Fail-safe: fetch from DB
+        }
+    }
+
+    public void invalidateUserPrincipal(String email) {
+        try {
+            String key = CACHE_USER_PRINCIPAL + email;
+            redisTemplate.delete(key);
+            log.info("[REDIS-SERVICE] Invalidated user principal cache for user: {}", email);
+        } catch (Exception e) {
+            log.error("[REDIS-SERVICE] Failed to invalidate user principal cache: {}", e.getMessage());
         }
     }
 
