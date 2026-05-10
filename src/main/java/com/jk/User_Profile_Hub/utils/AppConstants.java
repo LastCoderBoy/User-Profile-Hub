@@ -13,6 +13,7 @@ public final class AppConstants {
 
     public static final List<String> PUBLIC_PATHS = List.of(
             // Authorization endpoints
+            AUTH_PATH + "/register",
             AUTH_PATH + "/login",
             AUTH_PATH + "/refresh-token",
 

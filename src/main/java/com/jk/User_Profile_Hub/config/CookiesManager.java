@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -16,10 +17,13 @@ import static com.jk.User_Profile_Hub.utils.AppConstants.REFRESH_TOKEN_DURATION_
 @Component
 public class CookiesManager {
 
+    @Value("${cookie.secure}")
+    private boolean isSecure;
+
     public void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // Set to true in production with HTTPS
+        cookie.setSecure(isSecure);
         cookie.setPath("/");
         cookie.setMaxAge((int) (REFRESH_TOKEN_DURATION_MS / 1000)); // Convert to seconds
         cookie.setAttribute("SameSite", "Strict");
@@ -40,7 +44,7 @@ public class CookiesManager {
     public void clearRefreshTokenCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, "");
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(isSecure);
         cookie.setPath("/");
         cookie.setMaxAge(0);
         cookie.setAttribute("SameSite", "Strict");

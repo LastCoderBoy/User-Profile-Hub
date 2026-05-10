@@ -10,8 +10,8 @@ import lombok.*;
 public class AuthResponse {
 
     private String accessToken;
-    private String refreshToken;
-    private String tokenType;
+    @Builder.Default
+    private String tokenType = "Bearer";
     private long expiresIn;
 
     // Snapshot of the authenticated user's public profile
@@ -22,12 +22,10 @@ public class AuthResponse {
     // ============================================
 
     public static AuthResponse of(String accessToken,
-                                  String refreshToken,
                                   long expiresIn,
                                   UserResponse user) {
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .expiresIn(expiresIn)
                 .user(user)
                 .build();

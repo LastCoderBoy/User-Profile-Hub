@@ -142,13 +142,15 @@ public class User implements Serializable {
      * Creates a new user with a generated UUID and default role USER.
      * Password must already be BCrypt-hashed by the caller.
      */
-    public static User createNew(String firstName, String lastName, String email, String passwordHash) {
+    public static User createNew(String firstName, String lastName, String email,
+                                 String passwordHash, String phoneNumber) {
         return User.builder()
                 .uuid(UUID.randomUUID().toString())
                 .firstName(firstName)
                 .lastName(lastName)
                 .email(email)
                 .passwordHash(passwordHash)
+                .phoneNumber(phoneNumber) // might be null
                 .role(Role.ROLE_USER)
                 .active(true)
                 .build();

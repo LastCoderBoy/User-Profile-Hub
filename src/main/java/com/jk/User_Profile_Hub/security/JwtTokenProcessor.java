@@ -1,6 +1,7 @@
 package com.jk.User_Profile_Hub.security;
 
 
+import com.jk.User_Profile_Hub.enums.Role;
 import com.jk.User_Profile_Hub.exception.InternalServerException;
 import com.jk.User_Profile_Hub.exception.InvalidTokenException;
 import io.jsonwebtoken.Claims;
@@ -47,9 +48,9 @@ public class JwtTokenProcessor {
         }
     }
 
-    public String generateAccessToken(String email, List<String> roles) {
+    public String generateAccessToken(String email, String role) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put(JWT_CLAIM_ROLES, roles);
+        claims.put(JWT_CLAIM_ROLES, role);
         claims.put(JWT_CLAIM_TOKEN_TYPE, TOKEN_TYPE_ACCESS);
 
         Date now = new Date();
@@ -74,9 +75,9 @@ public class JwtTokenProcessor {
                     .getPayload();
 
             String email = claims.getSubject();
-            List<String> roles = getRolesFromToken(claims);
+            String role = getRolesFromToken(claims);
 
-            return Optional.of(new JwtClaimsPayload(email, roles));
+            return Optional.of(new JwtClaimsPayload(email, role));
         } catch (ExpiredJwtException e) {
             log.warn("[JWT-PROCESSOR] Token expired: {}", e.getMessage());
             return Optional.empty();
@@ -87,18 +88,18 @@ public class JwtTokenProcessor {
     }
 
     @SuppressWarnings("unchecked")
-    public List<String> getRolesFromToken(Claims claims) {
+    public String getRolesFromToken(Claims claims) {
         try {
-            Object roles = claims.get(JWT_CLAIM_ROLES);
+            Object role = claims.get(JWT_CLAIM_ROLES);
 
-            if (roles instanceof List) {
-                return (List<String>) roles;
+            if (role instanceof String) {
+                return role.toString();
             }
 
-            return List.of();
+            return "";
         } catch (Exception e) {
             log.error("[JWT-PROCESSOR] Failed to extract roles from token: {}", e.getMessage());
-            return List.of(); // Return empty list if roles not found
+            return ""; // Return empty String if role not found
         }
     }
 
