@@ -1,4 +1,4 @@
-package com.jk.User_Profile_Hub.exception;
+package com.jk.User_Profile_Hub.exception.custom;
 
 import java.io.Serial;
 

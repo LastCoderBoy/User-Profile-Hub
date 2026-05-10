@@ -78,6 +78,10 @@ public class UserPrincipal implements UserDetails {
 
     // ==================== Helper Methods ====================
 
+    public boolean isAdmin() {
+        return userRole == Role.ROLE_ADMIN;
+    }
+
     public String getUserRoleString() {
         return userRole.name();
     }

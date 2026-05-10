@@ -1,9 +1,8 @@
 package com.jk.User_Profile_Hub.security;
 
 
-import com.jk.User_Profile_Hub.enums.Role;
-import com.jk.User_Profile_Hub.exception.InternalServerException;
-import com.jk.User_Profile_Hub.exception.InvalidTokenException;
+import com.jk.User_Profile_Hub.exception.custom.InternalServerException;
+import com.jk.User_Profile_Hub.exception.custom.InvalidTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;

@@ -9,12 +9,17 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
 @EnableAsync
 @Slf4j
 public class AsyncConfig implements AsyncConfigurer {
 
+    /**
+     * Default executor — used by @Async without a named pool.
+     * Fast, lightweight tasks: token revocation, notifications, audit writes.
+     */
     @Bean(name = "taskExecutor")
     @Override
     public Executor getAsyncExecutor() {
@@ -30,6 +35,28 @@ public class AsyncConfig implements AsyncConfigurer {
         log.info("[ASYNC-CONFIG] Thread pool initialized: core={}, max={}, queue={}",
                 5, 10, 25);
 
+        return executor;
+    }
+
+    /**
+     * Dedicated executor for file processing pipeline.
+     * Slow, I/O+CPU-bound tasks: virus scan, thumbnail generation, PDF extraction.
+     * Isolated so file bursts never starve the taskExecutor pool.
+     */
+    @Bean(name = "fileAsyncExecutor")
+    public Executor fileAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(8);
+        executor.setQueueCapacity(50);
+        executor.setThreadNamePrefix("file-async-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
+        // CallerRunsPolicy: back-pressure instead of silent drop on queue full
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.initialize();
+
+        log.info("[ASYNC-CONFIG] fileAsyncExecutor initialized: core=4, max=8, queue=50");
         return executor;
     }
 

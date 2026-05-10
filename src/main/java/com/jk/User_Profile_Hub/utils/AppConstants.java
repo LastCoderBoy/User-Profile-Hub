@@ -1,6 +1,10 @@
 package com.jk.User_Profile_Hub.utils;
 
+import com.jk.User_Profile_Hub.enums.FileType;
+
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public final class AppConstants {
 
@@ -70,4 +74,37 @@ public final class AppConstants {
     public static final int DEFAULT_PAGE_SIZE = 10;
     public static final int MAX_PAGE_SIZE = 100;
     public static final String DEFAULT_SORT_DIRECTION = "desc";
+
+    // ========== File Configurations ==========
+    public static final int THUMBNAIL_SIZE = 200;
+    public static long MAX_AVATAR_SIZE_BYTES = 5242880; // 5 MB default
+    public static long MAX_CV_SIZE_BYTES =10485760; // 10 MB default
+    public static long MAX_COVER_LETTER_SIZE_BYTES = 10485760; // 10 MB default
+
+    public static final Map<FileType, Set<String>> ALLOWED_MIME_TYPES = Map.of(
+            FileType.AVATAR, Set.of(
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp"
+            ),
+            FileType.CV, Set.of(
+                    "application/pdf"
+            ),
+            FileType.COVER_LETTER, Set.of(
+                    "application/pdf",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"  // .docx
+            )
+    );
+
+    /**
+     * Maps detected MIME type to a clean file extension.
+     * Used to derive the stored filename extension from actual content not from user input.
+     */
+    public static final Map<String, String> MIME_TO_EXTENSION = Map.of(
+            "image/jpeg", "jpg",
+            "image/png", "png",
+            "image/webp", "webp",
+            "application/pdf", "pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx"
+    );
 }

@@ -3,9 +3,12 @@ package com.jk.User_Profile_Hub.service.impl;
 import com.jk.User_Profile_Hub.dto.request.UpdateProfileRequest;
 import com.jk.User_Profile_Hub.dto.response.UserResponse;
 import com.jk.User_Profile_Hub.entity.User;
-import com.jk.User_Profile_Hub.exception.InvalidTokenException;
-import com.jk.User_Profile_Hub.exception.ResourceNotFoundException;
+import com.jk.User_Profile_Hub.enums.FileStatus;
+import com.jk.User_Profile_Hub.enums.FileType;
+import com.jk.User_Profile_Hub.exception.custom.InvalidTokenException;
+import com.jk.User_Profile_Hub.exception.custom.ResourceNotFoundException;
 import com.jk.User_Profile_Hub.redis.RedisService;
+import com.jk.User_Profile_Hub.repository.FileMetadataRepository;
 import com.jk.User_Profile_Hub.repository.UserRepository;
 import com.jk.User_Profile_Hub.security.UserPrincipal;
 import com.jk.User_Profile_Hub.service.RefreshTokenService;
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final FileMetadataRepository fileMetadataRepository;
     private final RedisService redisService;
     private final RefreshTokenService refreshTokenService;
 
@@ -36,7 +40,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = findActiveUserById(userId);
-        UserResponse response = UserResponse.from(user);
+        UserResponse response = buildUserResponseWithFiles(user);
         redisService.cacheUserProfile(userId, response);
         return response;
     }
@@ -84,6 +88,30 @@ public class UserServiceImpl implements UserService {
         refreshTokenService.revokeAllRefreshTokensAsync(user.getId());
         redisService.invalidateUserProfile(user.getId());
         redisService.invalidateUserPrincipal(user.getEmail());
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse buildUserResponseWithFiles(User user) {
+        // Resolve the current active file URLs for each type
+        String avatarUrl = fileMetadataRepository
+                .findLatestByUserIdAndFileTypeAndStatus(
+                        user.getId(), FileType.AVATAR, FileStatus.READY)
+                .map(f -> "/files/" + f.getUuid() + "/thumbnail")
+                .orElse(null);
+
+        String cvUrl = fileMetadataRepository
+                .findLatestByUserIdAndFileTypeAndStatus(
+                        user.getId(), FileType.CV, FileStatus.READY)
+                .map(f -> "/files/" + f.getUuid() + "/download")
+                .orElse(null);
+
+        String coverLetterUrl = fileMetadataRepository
+                .findLatestByUserIdAndFileTypeAndStatus(
+                        user.getId(), FileType.COVER_LETTER, FileStatus.READY)
+                .map(f -> "/files/" + f.getUuid() + "/download")
+                .orElse(null);
+
+        return UserResponse.from(user, avatarUrl, cvUrl, coverLetterUrl);
     }
 
     // =============================================

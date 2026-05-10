@@ -49,3 +49,5 @@ application-local.properties
 .env.local
 .env.*.local
 
+# Uploaded files
+/uploads

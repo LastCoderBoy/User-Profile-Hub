@@ -1,7 +1,7 @@
 package com.jk.User_Profile_Hub.utils;
 
 
-import com.jk.User_Profile_Hub.exception.InvalidTokenException;
+import com.jk.User_Profile_Hub.exception.custom.InvalidTokenException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.security.SecureRandom;

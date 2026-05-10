@@ -2,9 +2,9 @@ package com.jk.User_Profile_Hub.service.impl;
 
 import com.jk.User_Profile_Hub.entity.RefreshToken;
 import com.jk.User_Profile_Hub.entity.User;
-import com.jk.User_Profile_Hub.exception.InternalServerException;
-import com.jk.User_Profile_Hub.exception.InvalidTokenException;
-import com.jk.User_Profile_Hub.exception.ResourceNotFoundException;
+import com.jk.User_Profile_Hub.exception.custom.InternalServerException;
+import com.jk.User_Profile_Hub.exception.custom.InvalidTokenException;
+import com.jk.User_Profile_Hub.exception.custom.ResourceNotFoundException;
 import com.jk.User_Profile_Hub.repository.RefreshTokenRepository;
 import com.jk.User_Profile_Hub.service.RefreshTokenService;
 import com.jk.User_Profile_Hub.utils.TokenUtils;

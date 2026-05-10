@@ -1,6 +1,6 @@
 package com.jk.User_Profile_Hub.security;
 
-import com.jk.User_Profile_Hub.exception.InvalidTokenException;
+import com.jk.User_Profile_Hub.exception.custom.InvalidTokenException;
 import com.jk.User_Profile_Hub.redis.RedisService;
 import com.jk.User_Profile_Hub.utils.TokenUtils;
 import jakarta.servlet.FilterChain;
